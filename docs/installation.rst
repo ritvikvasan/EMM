@@ -8,11 +8,25 @@ Installation
 Stable release
 --------------
 
-To install EMM, run this command in your terminal:
+To install EMM, run these commands in your terminal:
 
-.. code-block:: console
+* Create conda environment
 
-    $ pip install emm
+.. code-block:: bash
+
+    $ conda create --name cvae python=3.7
+
+* Activate conda environment :
+
+.. code-block:: bash
+
+    $ conda activate cvae
+
+* Install requirements in setup.py
+
+.. code-block:: bash
+
+    $ pip install -e .[all]
 
 This is the preferred method to install EMM, as it will always install the most recent stable release.
 

@@ -12,8 +12,6 @@ Welcome to EMM's documentation!
    contributing
    math
 
-.. mdinclude:: ../README.md
-
 Indices and tables
 ==================
 * :ref:`genindex`
