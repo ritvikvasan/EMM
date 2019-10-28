@@ -8,7 +8,41 @@ Endocytic membrane modeling: Let's try to infer the most optimal parameters of m
 
 ---
 
-## Features
+Installation
+--------
+
+* Create conda environment
+
+.. code-block:: bash
+
+    $ conda create --name cvae python=3.7
+
+* Activate conda environment :
+
+.. code-block:: bash
+
+    $ conda activate cvae
+
+* Install requirements in setup.py
+
+.. code-block:: bash
+
+    $ pip install -e .[all]
+
+Features
+--------
+
+* Run a single simulation of endocytic bud formation:
+
+.. code-block:: bash
+
+    $ cd notebooks
+
+.. code-block:: bash
+
+    $ jupyter notebook MembraneNotebook
+
+<!-- ## Features
 * Store values and retain the prior value in memory
 * ... some other functionality
 
@@ -89,7 +123,7 @@ branch.
     * _Recommendations:_
       * _Require pull request reviews before merging_
       * _Require status checks to pass before merging (Recommended: lint and test)_
-      * _Restrict who can push to matching branches_
+      * _Restrict who can push to matching branches_ -->
 
 
 ***Free software: MIT license***
