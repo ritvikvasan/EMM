@@ -1,8 +1,20 @@
 # EMM
 
-[![Build Status](https://github.com/ritvikvasan/emm/workflows/Build%20Master/badge.svg)](https://github.com/ritvikvasan/emm/actions)
+<!-- [![Build Status](https://github.com/ritvikvasan/emm/workflows/Build%20Master/badge.svg)](https://github.com/ritvikvasan/emm/actions)
 [![Documentation](https://github.com/ritvikvasan/emm/workflows/Documentation/badge.svg)](https://ritvikvasan.github.io/emm)
-[![Code Coverage](https://codecov.io/gh/ritvikvasan/emm/branch/master/graph/badge.svg)](https://codecov.io/gh/ritvikvasan/emm)
+[![Code Coverage](https://codecov.io/gh/ritvikvasan/emm/branch/master/graph/badge.svg)](https://codecov.io/gh/ritvikvasan/emm) -->
+
+.. image:: https://travis-ci.org/riitvikvasan/EMM.svg?branch=master
+        :target: https://travis-ci.org/ritvikvasan/EMM
+        :alt: Build Status
+
+.. image:: https://readthedocs.org/projects/EMM/badge/?version=latest
+        :target: https://emm.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
+
+<!-- .. image:: https://codecov.io/gh/AllenCellModeling/DLITE/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/AllenCellModeling/DLITE
+  :alt: Codecov Status -->
 
 Endocytic membrane modeling: Let's try to infer the most optimal parameters of membrane tension, bending rigidity, spontaneous curvature and coat area from the shape of an endocytic pit
 
