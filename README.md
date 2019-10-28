@@ -1,16 +1,8 @@
 # EMM
 
-<!-- [![Build Status](https://github.com/ritvikvasan/emm/workflows/Build%20Master/badge.svg)](https://github.com/ritvikvasan/emm/actions)
-[![Documentation](https://github.com/ritvikvasan/emm/workflows/Documentation/badge.svg)](https://ritvikvasan.github.io/emm)
-[![Code Coverage](https://codecov.io/gh/ritvikvasan/emm/branch/master/graph/badge.svg)](https://codecov.io/gh/ritvikvasan/emm) -->
-
-.. image:: https://travis-ci.org/riitvikvasan/EMM.svg?branch=master
-        :target: https://travis-ci.org/ritvikvasan/EMM
-        :alt: Build Status
-
-.. image:: https://readthedocs.org/projects/EMM/badge/?version=latest
-        :target: https://emm.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
+[![Build Status](https://travis-ci.org/riitvikvasan/EMM.svg?branch=master)](https://travis-ci.org/ritvikvasan/EMM)
+[![Documentation](https://readthedocs.org/projects/EMM/badge/?version=latest)](https://emm.readthedocs.io/en/latest/?badge=latest)
+<!-- [![Code Coverage](https://codecov.io/gh/ritvikvasan/emm/branch/master/graph/badge.svg)](https://codecov.io/gh/ritvikvasan/emm) -->
 
 <!-- .. image:: https://codecov.io/gh/AllenCellModeling/DLITE/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/AllenCellModeling/DLITE
@@ -25,19 +17,13 @@ Installation
 
 * Create conda environment
 
-.. code-block:: bash
-
     $ conda create --name cvae python=3.7
 
 * Activate conda environment :
 
-.. code-block:: bash
-
     $ conda activate cvae
 
 * Install requirements in setup.py
-
-.. code-block:: bash
 
     $ pip install -e .[all]
 
@@ -46,11 +32,7 @@ Features
 
 * Run a single simulation of endocytic bud formation:
 
-.. code-block:: bash
-
     $ cd notebooks
-
-.. code-block:: bash
 
     $ jupyter notebook MembraneNotebook
 
