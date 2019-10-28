@@ -43,7 +43,7 @@ interactive_requirements = [
     "matplotlib",
 ]
 
-requirements = []
+requirements = ["scipy"]
 
 extra_requirements = {
     "test": test_requirements,

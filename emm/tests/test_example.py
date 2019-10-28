@@ -16,7 +16,7 @@ from emm import Example
 
 class TestExample(object):
 
-    START_VALUE = 5
+    START_VALUE = 0.01
 
     def test_initialize_value(self):
         example = Example(self.START_VALUE)
