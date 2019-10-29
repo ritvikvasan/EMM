@@ -1,7 +1,8 @@
 # EMM
 
-[![Build Status](https://travis-ci.org/riitvikvasan/EMM.svg?branch=master)](https://travis-ci.org/ritvikvasan/EMM)
-[![Documentation](https://readthedocs.org/projects/EMM/badge/?version=latest)](https://emm.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/ritvikvasan/EMM.svg?branch=master)](https://travis-ci.org/ritvikvasan/EMM)
+[![Documentation](https://readthedocs.org/projects/emm/badge/?version=latest)](https://emm.readthedocs.io/en/latest/?badge=latest)
+      
 <!-- [![Code Coverage](https://codecov.io/gh/ritvikvasan/emm/branch/master/graph/badge.svg)](https://codecov.io/gh/ritvikvasan/emm) -->
 
 <!-- .. image:: https://codecov.io/gh/AllenCellModeling/DLITE/branch/master/graph/badge.svg
