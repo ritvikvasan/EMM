@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""
-This sample script will get deployed in the bin directory of the
-users' virtualenv when the parent module is installed using pip.
-"""
-
 import sys
 import argparse
 import logging
@@ -23,29 +15,22 @@ logging.basicConfig(level=logging.INFO,
 
 
 class Args(argparse.Namespace):
-
-    DEFAULT_FIRST = 10
-    DEFAULT_SECOND = 20
+    TEST_PATH = "../matfiles/"
 
     def __init__(self):
         # Arguments that could be passed in through the command line
-        self.first = self.DEFAULT_FIRST
-        self.second = self.DEFAULT_SECOND
+        self.path = self.TEST_PATH
         self.debug = False
-        #
         self.__parse()
 
     def __parse(self):
         p = argparse.ArgumentParser(prog='run_example',
                                     description='A simple example of a bin script')
         p.add_argument('-v', '--version', action='version', version='%(prog)s ' + get_module_version())
-        p.add_argument('-f', '--first', action='store', dest='first', type=int, default=self.first,
-                       help='The first argument value')
-        p.add_argument('-s', '--second', action='store', dest='second', type=int, default=self.second,
-                       help='The first argument value')
+        p.add_argument('-d', '--directory', action='store', dest='path', type=str, default=self.path,
+                       help='The directory to .mat files')
         p.add_argument('--debug', action='store_true', dest='debug', help=argparse.SUPPRESS)
         p.parse_args(namespace=self)
-
 
 ###############################################################################
 def parse_mat_file():
@@ -77,6 +62,5 @@ def main():
 
 ###############################################################################
 # Allow caller to directly run this module (usually in development scenarios)
-
 if __name__ == '__main__':
     main()
