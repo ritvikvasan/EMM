@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ritvikvasan/EMM.svg?branch=master)](https://travis-ci.org/ritvikvasan/EMM)
 [![Documentation](https://readthedocs.org/projects/emm/badge/?version=latest)](https://emm.readthedocs.io/en/latest/?badge=latest)
+  
       
 <!-- [![Code Coverage](https://codecov.io/gh/ritvikvasan/emm/branch/master/graph/badge.svg)](https://codecov.io/gh/ritvikvasan/emm) -->
 
@@ -18,11 +19,11 @@ Installation
 
 * Create conda environment
 
-    $ conda create --name cvae python=3.7
+    $ conda create --name emm python=3.7
 
 * Activate conda environment :
 
-    $ conda activate cvae
+    $ conda activate emm
 
 * Install requirements in setup.py
 
