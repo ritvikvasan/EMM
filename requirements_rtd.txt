@@ -15,7 +15,6 @@ cycler==0.10.0
 decorator==4.4.1
 defusedxml==0.6.0
 docutils==0.15.2
--e git+https://github.com/ritvikvasan/emm@01778567adcfef77f7bbf80747feb9e27caea9d9#egg=emm
 entrypoints==0.3
 filelock==3.0.12
 flake8==3.7.9

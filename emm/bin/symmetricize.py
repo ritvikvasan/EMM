@@ -6,36 +6,46 @@ import scipy.io as sio
 import similaritymeasures
 
 class Symmetricize:
-    def read_mat_file(path):
-        """Extracts fit and outerfit data from .mat files
+    """Performs necessary calculations to symmetricize irregularly shaped cell buds
+
+    Attributes:
+        path: relative path from where function is called to .mat files
+        x_fit: x fit data extracted from file at given path
+        y_fit: y fit data extracted from file at given path
+        x_outerfit: x outerfit data (protein coat) extracted from file at given path
+        y_outerfit: y outerfit data (protein coat) extracted from file at given path
+    """
+    def __init__(self, path):
+        self.path = path
+        mat_contents = sio.loadmat(self.path)
+        self.x_fit = mat_contents['fit'][:,0]
+        self.y_fit = mat_contents['fit'][:,1]
+
+        self.x_outerfit = mat_contents['outerfit'][:,0]
+        self.y_outerfit = mat_contents['outerfit'][:,1]
+        self.locs = []
+
+    def make_symmetric(self, fit_or_outerfit = "fit", rot_x = [], rot_y = []):
+        """Transforms non-symmetrical curve into symmetrical one
 
         Parameters
         ----------
-        path : str
-            The relative path to the .mat file.
+        fit_or_outerfit : str
+            If equals to "fit", will make the fit data symmetrical. Otherwise, will symmetricize outerfit data
         Returns
         -------
-        dict
-            A dictionary with the keys "x_fit", "y_fit", and "x_outerfit", "y_outerfit".
-        """
-        mat_contents = sio.loadmat(path)
-        return {'x_fit': mat_contents['fit'][:,0], 'y_fit': mat_contents['fit'][:, 1],
-                'x_outerfit': mat_contents['outerfit'][:, 0], 'y_outerfit': mat_contents['outerfit'][:, 1]}
-
-    def make_symmetric(x_fit_data, y_fit_data):
-        """Transforms non-symmetrical curvess into symmetrical ones
-
-        Parameters
-        ----------
-        x_fit_data : numpy.ndarray
-            An array containing all the x coordinates for fit data
-        y_fit_data : numpy.ndarray
-            An array containing all the y coordinates for fit data
-        Returns
-        -------
-        numpy.ndarray, numpy.ndarray
+        np.ndarray, np.ndarray
             Arrays containing the symmetricized x and y coordinates
         """
+        if (fit_or_outerfit == "fit"):
+            x_fit_data = self.x_fit
+            y_fit_data = self.y_fit
+        elif (fit_or_outerfit == "outerfit"):
+            x_fit_data = self.x_outerfit
+            y_fit_data = self.y_outerfit
+        elif (fit_or_outerfit == "rotated"):
+            x_fit_data = rot_x
+            y_fit_data = rot_y
         new_x_fit_data = np.absolute(x_fit_data) #that way we can calculate average x coord
 
         x_fit_data_transformed = np.zeros(len(new_x_fit_data)) #initialize resulting arrays
@@ -54,28 +64,34 @@ class Symmetricize:
             y_fit_data_transformed[i] = (y_fit_data[i] + y_fit_data[-1 - i]) / 2
             y_fit_data_transformed[-1 - i] = (y_fit_data[i] + y_fit_data[-1 - i]) / 2
 
-        #after the above loops, there are some values we didn't take into account in the calculations, so we do them here
-        leftover_data = (new_x_fit_data[0:dist_from_mid + 1] + new_x_fit_data[len(new_x_fit_data) - dist_from_mid - 1:]) / 2
+        x, y = self.truncate_tails(x_fit_data_transformed, y_fit_data_transformed)
+        return x, y
 
-        x_fit_data_transformed[0:dist_from_mid + 1] = - np.flip(leftover_data) #the first few data
-        x_fit_data_transformed[len(new_x_fit_data) - dist_from_mid - 1:] = leftover_data #the last few datapoints
-        #NOTE: the resulting array is not PERFECTLY symmetrical; sometimes it can be off by one x value
-        return x_fit_data_transformed, y_fit_data_transformed
+    def truncate_tails(self, sym_x, sym_y):
+        self.locs = np.where(sym_x == 0)[0]
+        y = np.delete(sym_y, self.locs)
+        x = sym_x[sym_x != 0]
+        return x, y
 
-    def rotate_figure(x, y):
+    def rotate_figure(self, fit_or_outerfit = "fit"):
         """ Performs PCA to determine major/minor axes and rotates figure upright according to major axis
 
         Parameters
         ----------
-        x : numpy.ndarray
-            An array containing x coordinates of fit data
-        y : numpy.ndarray
-            An array containing y coordinates of fit data
+        fit_or_outerfit : str
+            If equals to "fit", will rotate the fit data symmetrical. Otherwise, will rotate outerfit data
         Returns
         -------
-        numpy.ndarray, numpy.ndarray
+        np.ndarray, np.ndarray
             Arrays containing rotated x and y coordinates
         """
+        if (fit_or_outerfit == "fit"):
+            x = self.x_fit
+            y = self.y_fit
+        else:
+            x = self.x_outerfit
+            y = self.y_outerfit
+
         x -= np.mean(x)
         y -= np.mean(y)
         coords = np.vstack([x, y])
@@ -100,18 +116,16 @@ class Symmetricize:
         x_transformed, y_transformed = transformed_mat.A
         return x_transformed, y_transformed
 
-    def compute_dfd(x1, y1, x2, y2):
+    def compute_dfd(self, x1, y1, x2, y2):
         """Computes the discrete Frechet distance between two curves
         Parameters
         ----------
-        x1 : np.ndarray
-            An array containing x coordinates of first curve
-        y1 : np.ndarray
-            An array containing y coordinates of first curve
         x2 : np.ndarray
-            An array containing x coordinates of second curve
+            An array containing x coordinates of the other curve
         y2 : np.ndarray
-            An array containing y coordinates of second curve
+            An array containing y coordinates of the other curve
+        fit_or_outerfit : str
+            If equals to "fit", will use fit data for DFD. Otherwise, will use outerfit data
         Returns
         -------
         float
@@ -119,26 +133,32 @@ class Symmetricize:
         """
         return similaritymeasures.frechet_dist((x1, y1), (x2, y2))
 
-    def should_rotate(x, y):
+    def should_rotate(self, fit_or_outerfit = "fit"):
         """Compares the Frechet distance between 1) untransformed data and (only) symmetricized data
         to 2) rotated data and rotated+symmetricized data. If 2 is smaller, then returns true.
         Parameters
         ----------
-        x : np.ndarray
-            An array containing x coordinates of fit datapoints
-        y : np.ndarray
-            An array contianing y coordinates of fit datapoints
+        fit_or_outerfit : str
+            If equals to "fit", will use fit data for DFDs. Otherwise, will use outerfit data
         Returns
         -------
         bool
-            True if the figure has a smaller Frechet distance when rotated then symmetricized; 
+            True if the figure has a smaller Frechet distance when rotated then symmetricized;
             false otherwise.
         """
-        sym_x, sym_y = make_symmetric(x, y)
-        dfd_1 = compute_dfd(x, y, sym_x, sym_y)
+        if (fit_or_outerfit == "fit"):
+            x = self.x_fit
+            y = self.y_fit
+        else:
+            x = self.x_outerfit
+            y = self.y_outerfit
 
-        rotated_x, rotated_y = rotate_figure(x, y)
-        rotate_then_sym_x, rotate_then_sym_y = make_symmetric(rotated_x, rotated_y)
-        dfd_2 = compute_dfd(rotated_x, rotated_y, rotate_then_sym_x, rotate_then_sym_y)
+        sym_x, sym_y = self.make_symmetric(fit_or_outerfit)
+        dfd_1 = self.compute_dfd(np.delete(x, self.locs), np.delete(y, self.locs), sym_x, sym_y)
+
+        rotated_x, rotated_y = self.rotate_figure(fit_or_outerfit)
+        rotate_then_sym_x, rotate_then_sym_y = self.make_symmetric(fit_or_outerfit)
+
+        dfd_2 = self.compute_dfd(np.delete(rotated_x, self.locs), np.delete(rotated_y, self.locs), rotate_then_sym_x, rotate_then_sym_y)
 
         return (dfd_1 > dfd_2)
