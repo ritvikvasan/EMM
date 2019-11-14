@@ -7,19 +7,26 @@ import similaritymeasures
 
 class Symmetricize:
     """Performs necessary calculations to symmetricize irregularly shaped cell buds
-
     Attributes:
-        path: relative path from where function is called to .mat files
-        x_fit: x fit data extracted from file at given path
-        y_fit: y fit data extracted from file at given path
-        x_outerfit: x outerfit data (protein coat) extracted from file at given path
-        y_outerfit: y outerfit data (protein coat) extracted from file at given path
+    -----------
+        path: str
+            relative path from where function is called to .mat files
+        x_fit: np.ndarray
+            x fit data extracted from file at given path
+        y_fit: np.ndarray
+            y fit data extracted from file at given path
+        x_outerfit: np.ndarray
+            x outerfit data (protein coat) extracted from file at given path
+        y_outerfit: np.ndarray
+            y outerfit data (protein coat) extracted from file at given path
+        locs : np.ndarray
+            Indices necessary for truncate_tails to determine where to truncate
     """
     def __init__(self, path):
         self.path = path
         mat_contents = sio.loadmat(self.path)
-        self.x_fit = mat_contents['fit'][:,0]
-        self.y_fit = mat_contents['fit'][:,1]
+        self.x_fit = mat_contents['fit'][:,0] #extracts x fit data
+        self.y_fit = mat_contents['fit'][:,1] #extracts y fit data
 
         self.x_outerfit = mat_contents['outerfit'][:,0]
         self.y_outerfit = mat_contents['outerfit'][:,1]
@@ -31,7 +38,13 @@ class Symmetricize:
         Parameters
         ----------
         fit_or_outerfit : str
-            If equals to "fit", will make the fit data symmetrical. Otherwise, will symmetricize outerfit data
+            If equals to "fit", will make the fit data symmetrical.
+            If equals to "outerfit", will symmetricize outerfit data
+            If equals to "rotated", will symmetricize rotated data passed through function
+        rot_x : np.ndarray (optional)
+            If "rotated" select for fit_or_outerfit, then will symmetricize rotated x fit data
+        rot_y : np.ndarray (optional)
+            If "rotated" select for fit_or_outerfit, then wil symmetricize rotated y fit data
         Returns
         -------
         np.ndarray, np.ndarray
@@ -68,6 +81,19 @@ class Symmetricize:
         return x, y
 
     def truncate_tails(self, sym_x, sym_y):
+        """ Removes all instances where x coordinates = 0 in sym_x and readjusts sym_y's shape
+        to match that of new sym_x
+        Parameters
+        ----------
+        sym_x : np.ndarray
+            Symmetricized x coordinates containing 0s at the front/end of the array
+        sym_y : np.ndarray
+            Symmetricized y coordinates
+        Returns
+        -------
+        np.ndarray, np.ndarray
+            Arrays containing the new x and y coordinates without the tails.
+        """
         self.locs = np.where(sym_x == 0)[0]
         y = np.delete(sym_y, self.locs)
         x = sym_x[sym_x != 0]
