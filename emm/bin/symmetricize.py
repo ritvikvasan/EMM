@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 import imageio
 import skimage.filters
 import scipy.io as sio
+import math
 import similaritymeasures
 
 class Symmetricize:
     """Performs necessary calculations to symmetricize irregularly shaped cell buds
+    
     Attributes:
     -----------
         path: str
@@ -20,7 +22,15 @@ class Symmetricize:
         y_outerfit: np.ndarray
             y outerfit data (protein coat) extracted from file at given path
         locs : np.ndarray
-            Indices necessary for truncate_tails to determine where to truncate
+            Indices necessary for truncate_tails to determine where to truncate          
+        x_fit_symmetric : np.ndarray
+            x fit data fully symmetricized
+        y_fit_symmetric : np.ndarray
+            y fit data fully symmetricized
+        x_outerfit_symmetric : np.ndarray
+            x outerfit data fully symmetricized
+        y_outerfit_symmetric : np.ndarray
+            y outerfit data fully symmetricized
     """
     def __init__(self, path):
         self.path = path
@@ -31,7 +41,12 @@ class Symmetricize:
         self.x_outerfit = mat_contents['outerfit'][:,0]
         self.y_outerfit = mat_contents['outerfit'][:,1]
         self.locs = []
-
+        
+        self.x_fit_symmetric = []
+        self.y_fit_symmetric = []
+        self.x_outerfit_symmetric = []
+        self.y_outerfit_symmetric = []
+        
     def make_symmetric(self, fit_or_outerfit = "fit", rot_x = [], rot_y = []):
         """Transforms non-symmetrical curve into symmetrical one
 
@@ -45,6 +60,7 @@ class Symmetricize:
             If "rotated" select for fit_or_outerfit, then will symmetricize rotated x fit data
         rot_y : np.ndarray (optional)
             If "rotated" select for fit_or_outerfit, then wil symmetricize rotated y fit data
+        
         Returns
         -------
         np.ndarray, np.ndarray
@@ -59,6 +75,9 @@ class Symmetricize:
         elif (fit_or_outerfit == "rotated"):
             x_fit_data = rot_x
             y_fit_data = rot_y
+        else:
+            raise ValueError("Input can only be fit, outerfit, or rotated")
+            
         new_x_fit_data = np.absolute(x_fit_data) #that way we can calculate average x coord
 
         x_fit_data_transformed = np.zeros(len(new_x_fit_data)) #initialize resulting arrays
@@ -83,12 +102,14 @@ class Symmetricize:
     def truncate_tails(self, sym_x, sym_y):
         """ Removes all instances where x coordinates = 0 in sym_x and readjusts sym_y's shape
         to match that of new sym_x
+        
         Parameters
         ----------
         sym_x : np.ndarray
             Symmetricized x coordinates containing 0s at the front/end of the array
         sym_y : np.ndarray
             Symmetricized y coordinates
+            
         Returns
         -------
         np.ndarray, np.ndarray
@@ -99,6 +120,37 @@ class Symmetricize:
         x = sym_x[sym_x != 0]
         return x, y
 
+    def curve_area(self):
+        """ Approximates the area of the symmetricized outerfit protein coat
+        
+        Parameters (a0 in the Membrane model)
+        ----------
+        x : np.ndarray
+            x data of the symmetricized outerfit array
+        y : np.ndarray
+            y data of the symmetricized outerfit array
+            
+        Returns
+        -------
+        int
+            The approximate area of the protein coat (a0)
+        """
+        if (getattr(self, "x_fit_symmetric") == [] or getattr(self, "x_outerfit_symmetric") == []):
+            self.do_everything("fit")
+            self.do_everything("outerfit")
+            
+        fit_length = 0
+        outerfit_length = 0
+        
+        for i in range(len(self.x_fit_symmetric) - 1):
+            fit_length += math.sqrt((self.x_fit_symmetric[i] - self.x_fit_symmetric[i + 1])**2 + 
+                                    (self.y_fit_symmetric[i] - self.y_fit_symmetric[i + 1])**2)
+        for i in range(len(self.x_outerfit_symmetric) - 1):
+            outerfit_length += math.sqrt((self.x_outerfit_symmetric[i] - self.x_outerfit_symmetric[i + 1])**2 +
+                                         (self.y_outerfit_symmetric[i] - self.y_outerfit_symmetric[i + 1])**2)
+        plt.close()
+        return math.sqrt((outerfit_length / fit_length) * 200)
+    
     def rotate_figure(self, fit_or_outerfit = "fit"):
         """ Performs PCA to determine major/minor axes and rotates figure upright according to major axis
 
@@ -106,6 +158,7 @@ class Symmetricize:
         ----------
         fit_or_outerfit : str
             If equals to "fit", will rotate the fit data symmetrical. Otherwise, will rotate outerfit data
+            
         Returns
         -------
         np.ndarray, np.ndarray
@@ -114,9 +167,11 @@ class Symmetricize:
         if (fit_or_outerfit == "fit"):
             x = self.x_fit
             y = self.y_fit
-        else:
+        elif (fit_or_outerfit == "outerfit"):
             x = self.x_outerfit
             y = self.y_outerfit
+        else:
+            raise ValueError("Input can only be fit or outerfit")
 
         x -= np.mean(x)
         y -= np.mean(y)
@@ -144,6 +199,7 @@ class Symmetricize:
 
     def compute_dfd(self, x1, y1, x2, y2):
         """Computes the discrete Frechet distance between two curves
+        
         Parameters
         ----------
         x2 : np.ndarray
@@ -152,6 +208,7 @@ class Symmetricize:
             An array containing y coordinates of the other curve
         fit_or_outerfit : str
             If equals to "fit", will use fit data for DFD. Otherwise, will use outerfit data
+            
         Returns
         -------
         float
@@ -162,10 +219,12 @@ class Symmetricize:
     def should_rotate(self, fit_or_outerfit = "fit"):
         """Compares the Frechet distance between 1) untransformed data and (only) symmetricized data
         to 2) rotated data and rotated+symmetricized data. If 2 is smaller, then returns true.
+        
         Parameters
         ----------
         fit_or_outerfit : str
             If equals to "fit", will use fit data for DFDs. Otherwise, will use outerfit data
+            
         Returns
         -------
         bool
@@ -174,10 +233,12 @@ class Symmetricize:
         """
         if (fit_or_outerfit == "fit"):
             x = self.x_fit
-            y = self.y_fit
-        else:
+            y = self.y_fit 
+        elif (fit_or_outerfit == "outerfit"):
             x = self.x_outerfit
             y = self.y_outerfit
+        else:
+            raise ValueError("Input can only be fit or outerfit")
 
         sym_x, sym_y = self.make_symmetric(fit_or_outerfit)
         dfd_1 = self.compute_dfd(np.delete(x, self.locs), np.delete(y, self.locs), sym_x, sym_y)
@@ -188,3 +249,39 @@ class Symmetricize:
         dfd_2 = self.compute_dfd(np.delete(rotated_x, self.locs), np.delete(rotated_y, self.locs), rotate_then_sym_x, rotate_then_sym_y)
 
         return (dfd_1 > dfd_2)
+    
+    def do_everything(self, fit_or_outerfit = "fit"):
+        """ Handles all the logic of symmetricizing a shape. 
+        
+        Usually, there are two scenarios for symmetricizing a shape. 1) If the shape is too skew, then usually a 
+        rotation needs to be performed before symmetricizing the shape. 2) If the shape isn't, then a symmetricizing is all
+        that's needed. This function handles all the logic behind that.
+        
+        Parameters
+        ----------
+        fit_or_outerfit : str
+            If equals to "fit", will use fit data for calculations. Otherwise, will use outerfit data
+            
+        Returns
+        -------
+        np.ndarray, np.ndarray
+            The x and y coordinate arrays of the (fully) symmetricized data
+        """
+        if (fit_or_outerfit not in ["fit", "outerfit"]):
+            raise ValueError("Input can only be fit or outerfit")
+            
+        if(self.should_rotate(fit_or_outerfit)):
+            rot_x, rot_y = self.rotate_figure(fit_or_outerfit)       
+            rot_then_sym_x, rot_then_sym_y = self.make_symmetric("rotated", rot_x, rot_y)
+            plt.plot(getattr(self, "x_" + fit_or_outerfit), getattr(self, "y_" + fit_or_outerfit))
+            plt.plot(rot_then_sym_x, rot_then_sym_y)
+            setattr(self, "x_" + fit_or_outerfit + "_symmetric", rot_then_sym_x)
+            setattr(self, "y_" + fit_or_outerfit + "_symmetric", rot_then_sym_y)
+            return rot_then_sym_x, rot_then_sym_y
+        else:
+            new_x2, new_y2 = self.make_symmetric(fit_or_outerfit)
+            plt.plot(getattr(self, "x_" + fit_or_outerfit), getattr(self, "y_" + fit_or_outerfit))
+            plt.plot(new_x2, new_y2)
+            setattr(self, "x_" + fit_or_outerfit + "_symmetric", new_x2)
+            setattr(self, "y_" + fit_or_outerfit + "_symmetric", new_y2)
+            return new_x2, new_y2
