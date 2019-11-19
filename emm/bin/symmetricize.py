@@ -121,22 +121,18 @@ class Symmetricize:
         return x, y
 
     def curve_area(self):
-        """ Approximates the area of the symmetricized outerfit protein coat
-        
-        Parameters (a0 in the Membrane model)
+        """ Approximates the area of the symmetricized outerfit protein coat (a0)   
+        Parameters
         ----------
-        x : np.ndarray
-            x data of the symmetricized outerfit array
-        y : np.ndarray
-            y data of the symmetricized outerfit array
-            
+        None
+        
         Returns
         -------
         int
             The approximate area of the protein coat (a0)
         """
         if (getattr(self, "x_fit_symmetric") == [] or getattr(self, "x_outerfit_symmetric") == []):
-            self.do_everything("fit")
+            self.do_everything("fit") #in case there is no symmetricized fit/outerfit data
             self.do_everything("outerfit")
             
         fit_length = 0
@@ -144,7 +140,7 @@ class Symmetricize:
         
         for i in range(len(self.x_fit_symmetric) - 1):
             fit_length += math.sqrt((self.x_fit_symmetric[i] - self.x_fit_symmetric[i + 1])**2 + 
-                                    (self.y_fit_symmetric[i] - self.y_fit_symmetric[i + 1])**2)
+                                    (self.y_fit_symmetric[i] - self.y_fit_symmetric[i + 1])**2) #euclidean distance
         for i in range(len(self.x_outerfit_symmetric) - 1):
             outerfit_length += math.sqrt((self.x_outerfit_symmetric[i] - self.x_outerfit_symmetric[i + 1])**2 +
                                          (self.y_outerfit_symmetric[i] - self.y_outerfit_symmetric[i + 1])**2)
@@ -250,6 +246,30 @@ class Symmetricize:
 
         return (dfd_1 > dfd_2)
     
+    def curvature(self):
+        """Calculates the curvature of the protein coat (c0)
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        int
+            The curvature of the symmetricized protein coat (c0)
+        """
+        if (getattr(self, "x_fit_symmetric") == [] or getattr(self, "x_outerfit_symmetric") == []):
+            self.do_everything("fit") #in case there is no symmetricized data to work off of
+            self.do_everything("outerfit")      
+        mid_x = self.x_fit_symmetric[len(self.x_fit_symmetric) // 2 ]
+        mid_y = self.y_fit_symmetric[len(self.y_fit_symmetric) // 2 ]
+        
+        curv = 0
+        for i in range(len(self.x_outerfit_symmetric)):
+            #adds up all the 1 / distance from center to point on protein coat
+            curv += 1 / math.sqrt((mid_x - self.x_outerfit_symmetric[i])**2 + (mid_y - self.y_outerfit_symmetric[i])**2)
+        curv /= len(self.x_outerfit_symmetric)
+        return curv
+        
     def do_everything(self, fit_or_outerfit = "fit"):
         """ Handles all the logic of symmetricizing a shape. 
         
